@@ -4,7 +4,7 @@ Faggruppe 2015 arkitektur gruppe 3 - logistikktjenesten
 
 Har deaktivert integrasjonen med dockerhub. For å lage et lokalt image, følg stegene...
 
-mvn clean install package
+mvn package
 
 docker build -t mesanfagark/reaktiv-logistikk .
 
