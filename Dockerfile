@@ -3,8 +3,12 @@
 ##########################################################
 FROM dockerfile/java:oracle-java8
 
-ADD . /home
+ADD ./target/fagark-reaktiv-logistikk-0.1-SNAPSHOT-bin.tar.gz /opt
 
-WORKDIR /home/src/main/java
+#WORKDIR /opt
 
-RUN javac HelloWorld.java
+
+
+#RUN tar -zxf /opt/fagark-reaktiv-logistikk-0.1-SNAPSHOT-bin.tar.gz
+
+WORKDIR /opt/fagark-reaktiv-logistikk-0.1-SNAPSHOT
