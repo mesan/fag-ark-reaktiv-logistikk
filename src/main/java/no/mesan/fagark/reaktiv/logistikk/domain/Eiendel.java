@@ -3,34 +3,42 @@ package no.mesan.fagark.reaktiv.logistikk.domain;
 import java.io.Serializable;
 import java.util.Date;
 
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.Max;
+
 import no.mesan.fagark.reaktiv.logistikk.web.dto.EiendelDto;
 
 public class Eiendel implements Serializable {
 
     private static final long serialVersionUID = -3338988285265033207L;
+    
+    @Digits(integer = 0, fraction = 0)
     private final int id;
-    private final int eierId;
-
+    private final String eierId;
+    @Max(20)
     private final String navn;
-    private final String tekniskBeskrivelse;
-    private final String beskrivelse;
+    @Max(50)
+    private String tekniskBeskrivelse;
+    @Max(100)
+    private String beskrivelse;
+    
     private final Date opprettelseDato;
+    private Date sistOppdatert;
 
-
-    public Eiendel(final int id, final int eierId, final String navn, final String tekniskBeskrivelse, final String beskrivelse,
-            final Date opprettelseDato) {
+    public Eiendel(final int id, final String eierId, final String navn, final String tekniskBeskrivelse, final String beskrivelse) {
         super();
         this.id = id;
         this.eierId = eierId;
         this.navn = navn;
         this.tekniskBeskrivelse = tekniskBeskrivelse;
         this.beskrivelse = beskrivelse;
-        this.opprettelseDato = opprettelseDato;
+        opprettelseDato = new Date(System.currentTimeMillis());
+        sistOppdatert = opprettelseDato;
     }
 
     public static Eiendel create(final EiendelDto e) {
         if (e instanceof EiendelDto) {
-            return new Eiendel(e.id, e.eierid, e.navn, e.tekniskBeskrivelse, e.beskrivelse, e.opprettelseDato);
+            return new Eiendel(e.id, e.eierid, e.navn, e.tekniskBeskrivelse, e.beskrivelse);
         }
         return null;
     }
@@ -39,7 +47,7 @@ public class Eiendel implements Serializable {
         return id;
     }
 
-    public int getEierId() {
+    public String getEierId() {
         return eierId;
     }
     public String getNavn() {
@@ -56,6 +64,22 @@ public class Eiendel implements Serializable {
 
     public Date getOpprettelseDato() {
         return opprettelseDato;
+    }
+
+    public void setTekniskBeskrivelse(final String tekniskBeskrivelse) {
+        this.tekniskBeskrivelse = tekniskBeskrivelse;
+    }
+
+    public void setBeskrivelse(final String beskrivelse) {
+        this.beskrivelse = beskrivelse;
+    }
+
+    public Date getSistOppdatert() {
+        return sistOppdatert;
+    }
+
+    public void setSistOppdatert(final Date sistOppdatert) {
+        this.sistOppdatert = sistOppdatert;
     }
 
     @Override

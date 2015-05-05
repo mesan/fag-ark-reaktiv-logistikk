@@ -13,10 +13,11 @@ import no.mesan.fagark.reaktiv.logistikk.domain.Eier;
 @XmlRootElement(name = "eier")
 public class EierDto {
 
-    public int id;
+    public String id;
     public String fornavn;
     public String etternavn;
     public Date opprettetDato;
+    public Date sistOppdatert;
     @XmlElement(name = "eiendel")
     public final List<EiendelDto> eiendelerDto = new ArrayList<EiendelDto>();
 
@@ -30,20 +31,23 @@ public class EierDto {
                 + eiendelerDto + "]";
     }
 
-    public EierDto(final int id, final String fornavn, final String etternavn, final Date opprettetDato,
+    public EierDto(final String id, final String fornavn, final String etternavn, final Date opprettetDato,
+ final Date sistOppdatert,
             final List<Eiendel> eiendeler) {
         super();
         this.id = id;
         this.fornavn = fornavn;
         this.etternavn = etternavn;
         this.opprettetDato = opprettetDato;
+        this.sistOppdatert = sistOppdatert;
         eiendeler.forEach(e -> eiendelerDto.add(EiendelDto.create(e)));
 
     }
 
     public static EierDto create(final Eier e) {
         if (e instanceof Eier) {
-            return new EierDto(e.getId(), e.getFornavn(), e.getEtternavn(), e.getOpprettetDato(), e.getEiendeler());
+            return new EierDto(e.getId(), e.getFornavn(), e.getEtternavn(), e.getOpprettetDato(), e.getSistOppdatert(),
+                    e.getEiendeler());
         }
 
         return new EierDto();

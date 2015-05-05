@@ -36,36 +36,72 @@ public class EiendelsForvalter {
         mottak.tell(new TilMottak(Eier.create(eier)), mottak);
     }
 
-    public Optional<Eier> finnEier(final Integer id) {
-        final ConcurrentNavigableMap<Integer, Eier> treeMap = database.getTreeMap("eier");
-        return Optional.of(treeMap.get(new Integer(id)));
+    public void motta(final Eiendel mottatEiendel) {
+        try {
+            final ConcurrentNavigableMap<Integer, Eier> treeMap = database.getTreeMap("eier");
+            final Eier eierTilOppdatering = treeMap.get(mottatEiendel.getEierId());
+            eierTilOppdatering.oppdater(mottatEiendel);
 
+            database.commit();
+        } catch (final Exception e) {
+            database.rollback();
+            throw new RuntimeException(e);
+        }
     }
 
-    public Optional<Eiendel> finnEiendel(final Integer eierId, final Integer eiendelsId) {
-        final ConcurrentNavigableMap<Integer, Eier> treeMap = database.getTreeMap("eier");
-        final Eier eier = treeMap.get(new Integer(eierId));
-        final Predicate<Eiendel> eiendelTilhorer = (e -> e.getId() == eiendelsId);
+    public Optional<Eier> utlever(final String eierId) {
 
-        return eier.getEiendeler().stream().filter(eiendelTilhorer).findFirst();
+        try {
+            final ConcurrentNavigableMap<String, Eier> treeMap = database.getTreeMap("eier");
+            final Optional<Eier> utlevertEier = Optional.ofNullable(treeMap.remove(eierId));
+            database.commit();
+
+            return utlevertEier;
+        } catch (final Exception e) {
+            database.rollback();
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Optional<Eier> finnEier(final String eierId) {
+        final ConcurrentNavigableMap<String, Eier> treeMap = database.getTreeMap("eier");
+        return Optional.ofNullable(treeMap.get(eierId));
     }
 
     public List<Eier> listEiere() {
-        final ConcurrentNavigableMap<Integer, Eier> treeMap = database.getTreeMap("eier");
-
+        final ConcurrentNavigableMap<String, Eier> treeMap = database.getTreeMap("eier");
         return new ArrayList<Eier>(treeMap.values());
     }
 
+    public Optional<Eiendel> finnEiendel(final String eierId, final Integer eiendelsId) {
+        final ConcurrentNavigableMap<String, Eier> treeMap = database.getTreeMap("eier");
+        final Eier eier = treeMap.get(eierId);
+
+        if (eier == null) {
+            return Optional.empty();
+        }
+
+        final Predicate<Eiendel> eiendelTilhorer = (e -> e.getId() == eiendelsId);
+        return eier.getEiendeler().stream().filter(eiendelTilhorer).findFirst();
+    }
+
     public List<Eiendel> listEiendeler() {
-        final ConcurrentNavigableMap<Integer, Eier> treeMap = database.getTreeMap("eier");
+        final ConcurrentNavigableMap<String, Eier> treeMap = database.getTreeMap("eier");
         final List<Eiendel> alleEiendeler = new ArrayList<Eiendel>();
         treeMap.values().forEach(e -> alleEiendeler.addAll(e.getEiendeler()));
 
         return alleEiendeler;
     }
 
-    public Optional<Eier> utlever(final int id) {
-        final ConcurrentNavigableMap<Integer, Eier> treeMap = database.getTreeMap("eier");
-        return Optional.of(treeMap.remove(new Integer(id)));
+    public List<Eiendel> listEiendeler(final String eierId) {
+        final ConcurrentNavigableMap<String, Eier> treeMap = database.getTreeMap("eier");
+        final Eier eier = treeMap.get(new String(eierId));
+
+        if (eier == null) {
+            return new ArrayList<Eiendel>();
+        }
+
+        return eier.getEiendeler();
     }
+
 }

@@ -1,24 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-    <layout class="ch.qos.logback.classic.PatternLayout">
-      <Pattern>%d{HH:mm:ss.SSS} %-5level [%thread - %logger{0}] %msg%n</Pattern>
-    </layout>
-  </appender>
-  
-  <appender name="Logfile" class="ch.qos.logback.core.FileAppender">
-	<file>logs/logistikk.log</file>
-    <layout class="ch.qos.logback.classic.PatternLayout">
-      <Pattern>%d{HH:mm:ss.SSS} %-5level [%thread - %logger{0}] %msg%n</Pattern>
-    </layout>
- </appender>
-  
-  <logger name="no.nilsen.fagark.reaktiv.logistikk" level="TRACE"/>
-  
+	<appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+		<layout class="ch.qos.logback.classic.PatternLayout">
+			<Pattern>%d{HH:mm:ss.SSS} %-5level [%thread - %logger{0}] %msg%n
+			</Pattern>
+		</layout>
+	</appender>
 
-  <root level="TRACE">
-    <appender-ref ref="STDOUT" />
-    <appender-ref ref="Logfile" />
-  </root>
+	<appender name="Logfile"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>logs/logistikk.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+
+			<fileNamePattern>logs/logistikk.%i.log</fileNamePattern>
+			<minIndex>1</minIndex>
+			<maxIndex>5</maxIndex>
+		</rollingPolicy>
+
+		<triggeringPolicy
+			class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+			<maxFileSize>10MB</maxFileSize>
+		</triggeringPolicy>
+
+		<encoder>
+			<charset>UTF-8</charset>
+			<Pattern>%d{HH:mm:ss.SSS} %-5level [%thread - %logger{0}] %msg%n</Pattern>
+		</encoder>
+	</appender>
+	
+	<logger name="no.mesan.fagark.reaktiv.logistikk" additivity="false">
+		<level value="WARN" />
+		<appender-ref ref="Console" />
+		<appender-ref ref="Logfile" />
+	</logger>
+	
+	<logger name="no.mesan.fagark.reaktiv.logistikk" additivity="false">
+		<level value="WARN" />
+		<appender-ref ref="Console" />
+		<appender-ref ref="Logfile" />
+	</logger>
+
+	<root level="WARN">
+		<appender-ref ref="Console" />
+		<appender-ref ref="Logfile" />
+	</root>
 </configuration>
