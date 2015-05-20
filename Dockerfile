@@ -1,13 +1,7 @@
 ##########################################################
 # Dockerfile which builds a base image with oracle-java8.
 ##########################################################
-#FROM dockerfile/java:oracle-java8
-#FROM maven:3-jdk-8
-#FROM java:openjdk-8-jdk
-
-FROm dockerfile/java:oracle-java8
-
-RUN apt-get update && apt-get install -y maven
+FROM maven:3-jdk-8
 
 ADD . /home
 
@@ -22,3 +16,5 @@ WORKDIR /opt
 RUN tar -zxf fagark-reaktiv-logistikk-0.1-SNAPSHOT-bin.tar.gz && rm fagark-reaktiv-logistikk-0.1-SNAPSHOT-bin.tar.gz
 
 WORKDIR ./fagark-reaktiv-logistikk-0.1-SNAPSHOT
+
+CMD ["/usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java", "-jar", "bin/fagark-reaktiv-logistikk-0.1-SNAPSHOT.jar"]
