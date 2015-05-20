@@ -13,7 +13,6 @@ import org.mapdb.DBMaker;
  */
 public class EmbeddedDb {
 
-
     public static DB database;
 
     // = DBMaker.newFileDB(new

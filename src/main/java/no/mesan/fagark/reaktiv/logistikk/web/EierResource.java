@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -24,6 +25,7 @@ import javax.xml.bind.JAXBException;
 
 import no.mesan.fagark.reaktiv.logistikk.core.EiendelsForvalter;
 import no.mesan.fagark.reaktiv.logistikk.domain.Eier;
+import no.mesan.fagark.reaktiv.logistikk.domain.KontrollMelding;
 import no.mesan.fagark.reaktiv.logistikk.web.dto.EierDto;
 
 import org.apache.abdera.Abdera;
@@ -71,16 +73,16 @@ public class EierResource {
         return EierDto.create(funnet.get());
     }
 
-
     @PUT
     @Path("/{eierid}")
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-    public void mottak(@PathParam(value = "eierid") final String eierId, final EierDto eier) {
+    public void mottak(@HeaderParam("callback_url") final String callbackUrl, @PathParam(value = "eierid") final String eierId,
+            final EierDto eier) {
 
         try {
             eier.id = eierId;
             eier.eiendelerDto.forEach(e -> e.eierid = eier.id);
-            forvalter.mottak(eier);
+            forvalter.mottak(eier, callbackUrl);
         } catch (final Exception e) {
             logger.log(Level.WARNING, "Fei lunder lagring.", e);
             throw new WebApplicationException(Response.Status.NOT_FOUND);
@@ -112,6 +114,47 @@ public class EierResource {
         return new EiendelResource(eierId);
     }
 
+    @GET
+    @Path("/{eierid}/kontroll")
+    @Produces(MediaType.APPLICATION_ATOM_XML)
+    @Consumes(MediaType.APPLICATION_ATOM_XML)
+    public Feed kontroll(@PathParam(value = "eierid") final String eierId) {
+        final Optional<Eier> funnetEier = forvalter.finnEier(eierId);
+
+        if (!funnetEier.isPresent()) {
+            throw new WebApplicationException(Response.Status.NOT_FOUND);
+        }
+
+        final JAXBContext ctx;
+        try {
+            ctx = JAXBContext.newInstance(EierDto.class);
+        } catch (final JAXBException e1) {
+            throw new WebApplicationException(Response.Status.NOT_FOUND);
+        }
+        final Eier eier = funnetEier.get();
+
+        final Feed feed = abdera.newFeed();
+        feed.setId(uriInfo.getPath());
+
+        feed.setTitle("Kontrollmeldinger for " + eier.getId());
+        feed.setSubtitle("");
+        feed.addAuthor("Reaktiv - Logistikk ");
+
+        final List<KontrollMelding> hentKontrollMeldinger = forvalter.hentKontrollMeldinger(eierId);
+
+        for (final KontrollMelding m : hentKontrollMeldinger) {
+            final Entry entry = feed.addEntry();
+            entry.setId(uriInfo.getPath() + "/" + eier.getId());
+            entry.setTitle("Eierid: " + m.eierId);
+            entry.setContent(m.toString());
+            entry.setUpdated(m.opprettetDato);
+            entry.setPublished(m.opprettetDato);
+            entry.addLink(uriInfo.getRequestUri().toString());
+
+        }
+
+        return feed;
+    }
 
     @GET
     @Produces(MediaType.APPLICATION_ATOM_XML)
@@ -122,11 +165,11 @@ public class EierResource {
             throw new WebApplicationException(Response.Status.NOT_FOUND);
         }
 
-        JAXBContext ctx;
+        final JAXBContext ctx;
         try {
             ctx = JAXBContext.newInstance(EierDto.class);
         } catch (final JAXBException e1) {
-            throw new WebApplicationException(Response.Status.SERVICE_UNAVAILABLE);
+            throw new WebApplicationException(Response.Status.NOT_FOUND);
         }
 
         final Feed feed = abdera.newFeed();
@@ -148,7 +191,7 @@ public class EierResource {
 
                 final StringWriter writer = new StringWriter();
                 ctx.createMarshaller().marshal(EierDto.create(eier), writer);
-                entry.setContent(writer.toString(), "application/xml");
+                entry.setContent(writer.toString(), MediaType.APPLICATION_XML);
             } catch (final JAXBException e) {
                 logger.log(Level.WARNING, "Feil ved oppretting av Atom Entry.", e);
             }

@@ -11,17 +11,20 @@ import no.mesan.fagark.reaktiv.logistikk.domain.constraint.MinstEnEiendel;
 import no.mesan.fagark.reaktiv.logistikk.web.dto.EiendelDto;
 import no.mesan.fagark.reaktiv.logistikk.web.dto.EierDto;
 
+import org.hibernate.validator.constraints.NotBlank;
 
-public class Eier implements Serializable {
+
+public class Eier implements Serializable, Kontrollerbar {
 
     private static final long serialVersionUID = 3248313757240321024L;
 
+    @NotBlank(message = "Eiendel mangler eierid.")
     private final String id;
     private String fornavn;
     private String etternavn;
     private final Date opprettetDato;
-
     private Date sistOppdatert;
+
 
     @MinstEnEiendel
     private final List<Eiendel> eiendeler = new ArrayList<Eiendel>();
@@ -44,6 +47,32 @@ public class Eier implements Serializable {
 
         return null;
     }
+
+    public void oppdater(final Eier eier) {
+        etternavn = eier.getEtternavn();
+        fornavn = eier.getFornavn();
+        sistOppdatert = new Date(System.currentTimeMillis());
+        oppdater(eier.getEiendeler());
+    }
+
+    public void oppdater(final List<Eiendel> mottatEiendeler) {
+        mottatEiendeler.forEach(m -> oppdater(m));
+    }
+
+    public void oppdater(final Eiendel mottatEiendel) {
+        final Predicate<Eiendel> eiendelTilhorer = (e -> e.getId() == mottatEiendel.getId());
+        final Optional<Eiendel> funnet = eiendeler.stream().filter(eiendelTilhorer).findFirst();
+
+        if (funnet.isPresent()) {
+            final Eiendel eksisterende = funnet.get();
+            eksisterende.setBeskrivelse(mottatEiendel.getBeskrivelse());
+            eksisterende.setTekniskBeskrivelse(mottatEiendel.getTekniskBeskrivelse());
+            eksisterende.setSistOppdatert(new Date(System.currentTimeMillis()));
+        } else {
+            eiendeler.add(mottatEiendel);
+        }
+    }
+
     @Override
     public String toString() {
         return "Eier [id=" + id + ", fornavn=" + fornavn + ", etterNavn=" + etternavn + ", eiendeler=" + eiendeler + "]";
@@ -85,22 +114,5 @@ public class Eier implements Serializable {
         return eiendeler;
     }
 
-    public void oppdater(final List<Eiendel> mottatEiendeler) {
-        mottatEiendeler.forEach(m -> oppdater(m));
-    }
-
-    public void oppdater(final Eiendel mottatEiendel) {
-        final Predicate<Eiendel> eiendelTilhorer = (e -> e.getId() == mottatEiendel.getId());
-        final Optional<Eiendel> funnet = eiendeler.stream().filter(eiendelTilhorer).findFirst();
-
-        if (funnet.isPresent()) {
-            final Eiendel eksisterende = funnet.get();
-            eksisterende.setBeskrivelse(mottatEiendel.getBeskrivelse());
-            eksisterende.setTekniskBeskrivelse(mottatEiendel.getTekniskBeskrivelse());
-            eksisterende.setSistOppdatert(new Date(System.currentTimeMillis()));
-        } else {
-            eiendeler.add(mottatEiendel);
-        }
-    }
 
 }

@@ -42,7 +42,6 @@ public class App {
     }
 
     public App() {
-
         EmbeddedDb.initDatabase();
         startWebServer();
     }

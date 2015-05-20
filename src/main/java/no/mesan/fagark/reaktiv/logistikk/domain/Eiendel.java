@@ -6,19 +6,30 @@ import java.util.Date;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Max;
 
+import no.mesan.fagark.reaktiv.logistikk.domain.constraint.MobilTelefon;
 import no.mesan.fagark.reaktiv.logistikk.web.dto.EiendelDto;
 
-public class Eiendel implements Serializable {
+import org.hibernate.validator.constraints.NotBlank;
+
+@MobilTelefon(message = "Det er ikke lov med mobiltelefon!!!!!!!!!!!!!!!!!!!!!!!")
+public class Eiendel implements Serializable, Kontrollerbar {
 
     private static final long serialVersionUID = -3338988285265033207L;
     
-    @Digits(integer = 0, fraction = 0)
+    @Digits(integer = 0, fraction = 0, message = "Eiendel mangler id.")
     private final int id;
+
+    @NotBlank(message = "Eiendel mangler eierid.")
     private final String eierId;
+
     @Max(20)
+    @NotBlank(message = "Eiendel mangler navn")
     private final String navn;
+
     @Max(50)
+    @NotBlank(message = "Eiendel mangler teknisk beskrivelse.")
     private String tekniskBeskrivelse;
+
     @Max(100)
     private String beskrivelse;
     
