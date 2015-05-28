@@ -17,7 +17,7 @@ public class Eiendel implements Serializable, Kontrollerbar {
     private static final long serialVersionUID = -3338988285265033207L;
     
     @Digits(integer = 0, fraction = 0, message = "Eiendel mangler id.")
-    private final int id;
+    private int id;
 
     @NotBlank(message = "Eiendel mangler eierid.")
     private final String eierId;
@@ -56,6 +56,10 @@ public class Eiendel implements Serializable, Kontrollerbar {
 
     public int getId() {
         return id;
+    }
+
+    public void setId(final int id) {
+        this.id = id;
     }
 
     public String getEierId() {

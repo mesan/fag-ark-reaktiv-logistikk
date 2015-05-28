@@ -30,18 +30,13 @@
 	</appender>
 	
 	<logger name="no.mesan.fagark.reaktiv.logistikk" additivity="false">
-		<level value="WARN" />
+		<level value="TRACE" />
 		<appender-ref ref="Console" />
 		<appender-ref ref="Logfile" />
 	</logger>
 	
-	<logger name="no.mesan.fagark.reaktiv.logistikk" additivity="false">
-		<level value="WARN" />
-		<appender-ref ref="Console" />
-		<appender-ref ref="Logfile" />
-	</logger>
 
-	<root level="WARN">
+	<root level="TRACE">
 		<appender-ref ref="Console" />
 		<appender-ref ref="Logfile" />
 	</root>

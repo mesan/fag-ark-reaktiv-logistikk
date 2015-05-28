@@ -7,19 +7,16 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import no.mesan.fagark.reaktiv.logistikk.domain.Eiendel;
 import no.mesan.fagark.reaktiv.logistikk.domain.Eier;
 
 @XmlRootElement(name = "eier")
 public class EierDto {
 
     public String id;
-    public String fornavn;
-    public String etternavn;
     public Date opprettetDato;
     public Date sistOppdatert;
     @XmlElement(name = "eiendel")
-    public final List<EiendelDto> eiendelerDto = new ArrayList<EiendelDto>();
+    public List<EiendelDto> eiendelerDto;
 
     public EierDto() {
         super();
@@ -27,27 +24,26 @@ public class EierDto {
 
     @Override
     public String toString() {
-        return "Eier [id=" + id + ", fornavn=" + fornavn + ", etterNavn=" + etternavn + ", eiendeler="
+        return "Eier [id=" + id + ", eiendeler="
                 + eiendelerDto + "]";
     }
 
-    public EierDto(final String id, final String fornavn, final String etternavn, final Date opprettetDato,
+    public EierDto(final String id, final Date opprettetDato,
  final Date sistOppdatert,
-            final List<Eiendel> eiendeler) {
+ final List<EiendelDto> eiendelerDto) {
         super();
         this.id = id;
-        this.fornavn = fornavn;
-        this.etternavn = etternavn;
         this.opprettetDato = opprettetDato;
         this.sistOppdatert = sistOppdatert;
-        eiendeler.forEach(e -> eiendelerDto.add(EiendelDto.create(e)));
+        this.eiendelerDto = eiendelerDto;
 
     }
 
-    public static EierDto create(final Eier e) {
-        if (e instanceof Eier) {
-            return new EierDto(e.getId(), e.getFornavn(), e.getEtternavn(), e.getOpprettetDato(), e.getSistOppdatert(),
-                    e.getEiendeler());
+    public static EierDto create(final Eier eier) {
+        if (eier instanceof Eier) {
+            final List<EiendelDto> createdEiendeler = new ArrayList<EiendelDto>();
+            eier.getEiendeler().forEach(e -> createdEiendeler.add(EiendelDto.create(e)));
+            return new EierDto(eier.getId(), eier.getOpprettetDato(), eier.getSistOppdatert(), createdEiendeler);
         }
 
         return new EierDto();

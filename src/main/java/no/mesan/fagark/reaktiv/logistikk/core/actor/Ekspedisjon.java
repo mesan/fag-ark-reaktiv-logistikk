@@ -26,11 +26,13 @@ public class Ekspedisjon extends UntypedActor {
 
             try {
                 final ConcurrentNavigableMap<String, Eier> treeMap = database.getTreeMap(DatabaseCollectionName.EIER.toString());
+
                 final Eier funnet = treeMap.get(eier.getId());
 
                 if (funnet != null) {
                     funnet.oppdater(eier);
                 } else {
+
                     treeMap.put(eier.getId(), eier);
                 }
 
@@ -43,4 +45,5 @@ public class Ekspedisjon extends UntypedActor {
             unhandled(message);
         }
     }
+
 }

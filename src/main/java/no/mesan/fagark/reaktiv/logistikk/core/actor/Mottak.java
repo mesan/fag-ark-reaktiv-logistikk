@@ -4,6 +4,7 @@ import no.mesan.fagark.reaktiv.logistikk.core.actor.message.BaseEierMelding;
 import no.mesan.fagark.reaktiv.logistikk.core.actor.message.BaseEierMelding.TilEkspedisjon;
 import no.mesan.fagark.reaktiv.logistikk.core.actor.message.BaseEierMelding.TilKontroll;
 import no.mesan.fagark.reaktiv.logistikk.core.actor.message.BaseEierMelding.TilMottak;
+import no.mesan.fagark.reaktiv.logistikk.domain.Eiendel;
 import no.mesan.fagark.reaktiv.logistikk.domain.Eier;
 
 import org.slf4j.Logger;
@@ -40,6 +41,7 @@ public class Mottak extends UntypedActor {
         if (message instanceof TilMottak) {
             final Eier eier = ((BaseEierMelding) message).getEier();
             logger.trace("Mottak: " + eier);
+            opprettEiendelId(eier);
 
             hovedKontroller.tell(new TilKontroll(eier), getSelf());
 
@@ -55,4 +57,14 @@ public class Mottak extends UntypedActor {
             unhandled(message);
         }
     }
+
+    private void opprettEiendelId(final Eier eier) {
+        int eiendelId = 1;
+
+        for (final Eiendel e : eier.getEiendeler()) {
+            e.setId(eiendelId);
+            eiendelId++;
+        }
+    }
+
 }

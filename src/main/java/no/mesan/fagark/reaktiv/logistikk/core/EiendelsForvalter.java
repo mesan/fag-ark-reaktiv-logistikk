@@ -14,7 +14,6 @@ import no.mesan.fagark.reaktiv.logistikk.core.actor.message.BaseEierMelding.TilM
 import no.mesan.fagark.reaktiv.logistikk.domain.Eiendel;
 import no.mesan.fagark.reaktiv.logistikk.domain.Eier;
 import no.mesan.fagark.reaktiv.logistikk.domain.KontrollMelding;
-import no.mesan.fagark.reaktiv.logistikk.web.dto.EierDto;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
@@ -33,9 +32,9 @@ public class EiendelsForvalter {
         system = ActorSystem.create("EiendelForvalter");
     }
 
-    public void mottak(final EierDto eier, final String callbackUrl) {
-        final ActorRef mottak = system.actorOf(Props.create(Mottak.class, eier.eiendelerDto.size()));
-        mottak.tell(new TilMottak(Eier.create(eier)), mottak);
+    public void motta(final Eier eier, final String callbackUrl) {
+        final ActorRef mottak = system.actorOf(Props.create(Mottak.class, eier.getEiendeler().size()));
+        mottak.tell(new TilMottak(eier), mottak);
     }
 
     public void motta(final Eiendel mottatEiendel) {
@@ -61,8 +60,9 @@ public class EiendelsForvalter {
             return utlevertEier;
         } catch (final Exception e) {
             database.rollback();
-            throw new RuntimeException(e);
         }
+
+        return Optional.empty();
     }
 
     public Optional<Eier> finnEier(final String eierId) {
@@ -106,10 +106,29 @@ public class EiendelsForvalter {
         return eier.getEiendeler();
     }
 
+    public Optional<Eiendel> utlever(final String eierId, final int eiendelId) {
+        final ConcurrentNavigableMap<String, Eier> treeMap = database.getTreeMap(DatabaseCollectionName.EIER.toString());
+        final Eier eier = treeMap.get(eierId);
+
+        if (eier == null) {
+            return Optional.empty();
+        }
+
+        final Optional<Eiendel> funnet = eier.finn(eiendelId);
+
+        if (funnet.isPresent()) {
+            eier.slett(funnet.get());
+            return funnet;
+        }
+
+        return Optional.empty();
+    }
+
     public List<KontrollMelding> hentKontrollMeldinger(final String eierId) {
         final ConcurrentNavigableMap<String, List<KontrollMelding>> treeMap = database.getTreeMap(DatabaseCollectionName.KONTROLL
                 .toString());
 
         return treeMap.get(eierId);
     }
+
 }

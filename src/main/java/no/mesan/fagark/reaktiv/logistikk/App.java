@@ -9,8 +9,8 @@ import java.util.logging.Logger;
 
 import javax.ws.rs.core.UriBuilder;
 
+import no.mesan.fagark.reaktiv.logistikk.exception.ExceptionCatcher;
 import no.mesan.fagark.reaktiv.logistikk.web.AtomXmlProvider;
-import no.mesan.fagark.reaktiv.logistikk.web.EiendelResource;
 import no.mesan.fagark.reaktiv.logistikk.web.EierResource;
 
 import org.glassfish.jersey.filter.LoggingFilter;
@@ -64,8 +64,7 @@ public class App {
 
         final ResourceConfig config = new ResourceConfig();
         config.register(new LoggingFilter(logger, true));
-        config.register(EiendelResource.class);
-        config.register(EierResource.class);
+        config.register(ExceptionCatcher.newInstance(EierResource.class));
         config.register(AtomXmlProvider.class);
 
         return config;

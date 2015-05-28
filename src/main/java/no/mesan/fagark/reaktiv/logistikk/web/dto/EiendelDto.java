@@ -2,11 +2,14 @@ package no.mesan.fagark.reaktiv.logistikk.web.dto;
 
 import java.util.Date;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import no.mesan.fagark.reaktiv.logistikk.domain.Eiendel;
 
 @XmlRootElement(name = "eiendel")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class EiendelDto {
 
     public int id;

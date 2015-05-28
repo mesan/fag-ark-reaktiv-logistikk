@@ -20,8 +20,6 @@ public class Eier implements Serializable, Kontrollerbar {
 
     @NotBlank(message = "Eiendel mangler eierid.")
     private final String id;
-    private String fornavn;
-    private String etternavn;
     private final Date opprettetDato;
     private Date sistOppdatert;
 
@@ -29,28 +27,26 @@ public class Eier implements Serializable, Kontrollerbar {
     @MinstEnEiendel
     private final List<Eiendel> eiendeler = new ArrayList<Eiendel>();
 
-    public Eier(final String id, final String fornavn, final String etternavn,
-            final List<EiendelDto> eiendelerDto) {
+    public Eier(final String id, final List<EiendelDto> eiendelerDto) {
         super();
         this.id = id;
-        this.fornavn = fornavn;
-        this.etternavn = etternavn;
         opprettetDato = new Date(System.currentTimeMillis());
         sistOppdatert = opprettetDato;
         eiendelerDto.forEach(e -> eiendeler.add(Eiendel.create(e)));
     }
 
-    public static Eier create(final EierDto e) {
-        if (e instanceof EierDto) {
-            return new Eier(e.id, e.fornavn, e.etternavn, e.eiendelerDto);
+    public static Eier create(final EierDto eierDto) {
+        if (eierDto instanceof EierDto) {
+
+            final List<Eiendel> createdEiendeler = new ArrayList<Eiendel>();
+            eierDto.eiendelerDto.forEach(e -> createdEiendeler.add(Eiendel.create(e)));
+            return new Eier(eierDto.id, eierDto.eiendelerDto);
         }
 
         return null;
     }
 
     public void oppdater(final Eier eier) {
-        etternavn = eier.getEtternavn();
-        fornavn = eier.getFornavn();
         sistOppdatert = new Date(System.currentTimeMillis());
         oppdater(eier.getEiendeler());
     }
@@ -60,9 +56,8 @@ public class Eier implements Serializable, Kontrollerbar {
     }
 
     public void oppdater(final Eiendel mottatEiendel) {
-        final Predicate<Eiendel> eiendelTilhorer = (e -> e.getId() == mottatEiendel.getId());
-        final Optional<Eiendel> funnet = eiendeler.stream().filter(eiendelTilhorer).findFirst();
 
+        final Optional<Eiendel> funnet = finn(mottatEiendel.getId());
         if (funnet.isPresent()) {
             final Eiendel eksisterende = funnet.get();
             eksisterende.setBeskrivelse(mottatEiendel.getBeskrivelse());
@@ -73,21 +68,22 @@ public class Eier implements Serializable, Kontrollerbar {
         }
     }
 
+    public void slett(final Eiendel eiendel) {
+        eiendeler.remove(eiendel);
+    }
+
+    public Optional<Eiendel> finn(final int eiendelId) {
+        final Predicate<Eiendel> eiendelTilhorer = (e -> e.getId() == eiendelId);
+        return eiendeler.stream().filter(eiendelTilhorer).findFirst();
+    }
+
     @Override
     public String toString() {
-        return "Eier [id=" + id + ", fornavn=" + fornavn + ", etterNavn=" + etternavn + ", eiendeler=" + eiendeler + "]";
+        return "Eier [id=" + id + ", eiendeler=" + eiendeler + "]";
     }
 
     public String getId() {
         return id;
-    }
-
-    public String getFornavn() {
-        return fornavn;
-    }
-
-    public String getEtternavn() {
-        return etternavn;
     }
 
     public Date getOpprettetDato() {
@@ -102,17 +98,7 @@ public class Eier implements Serializable, Kontrollerbar {
         this.sistOppdatert = sistOppdatert;
     }
 
-    public void setFornavn(final String fornavn) {
-        this.fornavn = fornavn;
-    }
-
-    public void setEtternavn(final String etternavn) {
-        this.etternavn = etternavn;
-    }
-
     public List<Eiendel> getEiendeler() {
         return eiendeler;
     }
-
-
 }
