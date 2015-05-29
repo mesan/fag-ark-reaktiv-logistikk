@@ -25,7 +25,7 @@ GET
 Accept: application/json
 
 URL
-/logistikk/eier/1/eiendel/
+/logistikk/eier/1/eiendel/3
 
 GET
 Accept: application/json
