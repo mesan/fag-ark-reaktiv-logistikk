@@ -14,15 +14,22 @@ docker start logistikk
 
 Logistikk API
 
+URL
 /logistikk/eier/1
 
 PUT
 Content-Type: application/json
-{"eiendel":[{"id":1,"navn":"Telefon","tekniskBeskrivelse":"Sony","beskrivelse":"Svart telefon med en kjempe sprekk i skjerm."},{"id":2,"navn":"Caps","tekniskBeskrivelse":"Caps","beskrivelse":"Blå caps"}]}
+{"eiendel":[{"navn":"Telefon","tekniskBeskrivelse":"Sony","beskrivelse":"Svart telefon med en kjempe sprekk i skjerm."},{"navn":"Caps","tekniskBeskrivelse":"Caps","beskrivelse":"Blå caps"}]}
 
 GET
 Accept: application/json
 
+URL
+/logistikk/eier/1/eiendel/
 
+GET
+Accept: application/json
 
-
+PUT
+Content-Type: application/json
+{"navn":"Telefon","tekniskBeskrivelse":"Sony","beskrivelse":"Svart telefon med en kjempe sprekk i skjerm."}
