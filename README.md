@@ -3,7 +3,7 @@ Faggruppe 2015 arkitektur gruppe 3 - logistikktjenesten
 
 Logistikk tjenesten er tilgjengelig ved 
 
-docker run -i -t -p 9999:9999 --name logistikk mesanfagark/reaktiv-logistikk java -jar bin/fagark-reaktiv-logistikk-0.1-SNAPSHOT.jar
+docker run -i -t -p 9999:9999 --name logistikk mesanfagark/reaktiv-logistikk
 
 Deretter kan den startes med 
 docker start logistikk
