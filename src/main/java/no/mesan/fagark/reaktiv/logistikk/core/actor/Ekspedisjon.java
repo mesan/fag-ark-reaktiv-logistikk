@@ -22,7 +22,7 @@ public class Ekspedisjon extends UntypedActor {
     public void onReceive(final Object message) {
         if (message instanceof TilEkspedisjon) {
             final Eier eier = ((BaseEierMelding) message).getEier();
-            logger.trace("Ekspederer: " + eier);
+            logger.trace("Ekspederer eier med eiendeler: " + eier);
 
             try {
                 final ConcurrentNavigableMap<String, Eier> treeMap = database.getTreeMap(DatabaseCollectionName.EIER.toString());

@@ -22,7 +22,6 @@ import akka.actor.UntypedActor;
  * @author arne
  *
  */
-@SuppressWarnings("deprecation")
 public class Mottak extends UntypedActor {
     private static Logger logger = LoggerFactory.getLogger(Mottak.class);
 
@@ -40,7 +39,7 @@ public class Mottak extends UntypedActor {
     public void onReceive(final Object message) {
         if (message instanceof TilMottak) {
             final Eier eier = ((BaseEierMelding) message).getEier();
-            logger.trace("Mottak: " + eier);
+            logger.trace("Mottatt eiendeler: " + eier);
             opprettEiendelId(eier);
 
             hovedKontroller.tell(new TilKontroll(eier), getSelf());
@@ -48,7 +47,7 @@ public class Mottak extends UntypedActor {
         } else if (message instanceof TilEkspedisjon) {
 
             final Eier eier = ((TilEkspedisjon) message).getEier();
-            logger.trace("Kontrollert: " + eier);
+            logger.trace("Sender eiendeler til ekspedisjon: " + eier);
 
             ekspedisjon.tell(new TilEkspedisjon(eier), getSelf());
             getContext().stop(getSelf());

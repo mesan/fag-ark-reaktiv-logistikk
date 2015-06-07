@@ -16,15 +16,19 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriBuilder;
 
 import no.mesan.fagark.reaktiv.logistikk.core.EiendelsForvalter;
 import no.mesan.fagark.reaktiv.logistikk.domain.Eiendel;
 import no.mesan.fagark.reaktiv.logistikk.exception.ExceptionCatchable;
 import no.mesan.fagark.reaktiv.logistikk.exception.ExceptionLogger;
 import no.mesan.fagark.reaktiv.logistikk.web.dto.EiendelDto;
+import no.mesan.fagark.reaktiv.logistikk.web.dto.LinkBuilder;
+
+import org.glassfish.jersey.uri.internal.JerseyUriBuilder;
 
 public class EiendelResource {
+    final UriBuilder baseUriBuilder;
 
     private final String eierId;
 
@@ -32,9 +36,10 @@ public class EiendelResource {
 
     private final static EiendelsForvalter forvalter = new EiendelsForvalter();
 
-    public EiendelResource(final String eierId) {
+    public EiendelResource(final String eierId, final JerseyUriBuilder baseUriBuilder) {
         super();
         this.eierId = eierId;
+        this.baseUriBuilder = baseUriBuilder;
     }
 
     @GET
@@ -43,8 +48,16 @@ public class EiendelResource {
     public List<EiendelDto> visEiendeler() {
         final List<Eiendel> eiendelsListe = forvalter.listEiendeler(eierId);
 
+        final LinkBuilder linkBuilder = new LinkBuilder(baseUriBuilder);
+        linkBuilder.withResource(EierResource.class);
+        linkBuilder.withPath("/{eierid}");
+        linkBuilder.withRelation("eier");
+        linkBuilder.buildLink(eierId);
+
         final List<EiendelDto> eiendelerDto = new ArrayList<EiendelDto>();
-        eiendelsListe.forEach(e -> eiendelerDto.add(EiendelDto.create(e)));
+        eiendelsListe.forEach(e -> {
+            eiendelerDto.add(EiendelDto.create(e).withLinks(linkBuilder.getLinks()));
+        });
 
         return eiendelerDto;
     }
@@ -61,7 +74,16 @@ public class EiendelResource {
             throw new WebApplicationException(Response.Status.NOT_FOUND);
         }
 
-        return EiendelDto.create(funnet.get());
+        final Eiendel eiendel = funnet.get();
+
+        final LinkBuilder linkBuilder = new LinkBuilder(baseUriBuilder);
+        linkBuilder.withResource(EierResource.class);
+        linkBuilder.withPath("/{eierid}");
+        linkBuilder.withRelation("eier");
+        linkBuilder.buildLink(eiendel.getEierId());
+
+        return EiendelDto.create(eiendel).withLinks(linkBuilder.getLinks());
+
     }
 
     @PUT
@@ -74,7 +96,14 @@ public class EiendelResource {
 
         forvalter.motta(Eiendel.create(eiendel));
         logger.log(Level.INFO, "Lagret eiendel :" + eiendel);
-        return Response.status(Status.CREATED).build();
+
+        final LinkBuilder linkBuilder = new LinkBuilder(baseUriBuilder);
+        linkBuilder.withResource(EierResource.class);
+        linkBuilder.withPath("/{eierid}/eiendel/{eiendelid}");
+        linkBuilder.withRelation("eiendel");
+        linkBuilder.buildLink(eiendel.eierid, eiendelId);
+
+        return Response.created(linkBuilder.getFirstLink().getUri()).build();
     }
 
     @POST

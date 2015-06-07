@@ -36,6 +36,7 @@ public class Kontroll extends UntypedActor {
     Integer antallEiendeler = 0;
     Eier underBehandling;
 
+    @SuppressWarnings("deprecation")
     public Kontroll(final Integer pAntallEiendeler) {
         kontrollRouter = getContext().actorOf(
                 Props.create(EiendelKontroll.class).withRouter(new RoundRobinRouter(pAntallEiendeler)));
@@ -47,7 +48,7 @@ public class Kontroll extends UntypedActor {
     public void onReceive(final Object message) {
         if (message instanceof TilKontroll) {
             final Eier eier = ((TilKontroll) message).getEier();
-            logger.trace("Kontrollerer: " + eier);
+            logger.trace("Hovedkontroll av eiendeler: " + eier);
 
             if (underBehandling == null) {
                 mottak = getSender();
@@ -63,10 +64,10 @@ public class Kontroll extends UntypedActor {
 
         } else if (message instanceof EiendelTilEkspedisjon) {
             antallKontrollert++;
+            final Eiendel eiendel = ((EiendelTilEkspedisjon) message).getEiendel();
+            logger.trace("Eiendel er ferdig kontrollert: " + eiendel);
 
             if (antallKontrollert == antallEiendeler) {
-                final Eiendel eiendel = ((EiendelTilEkspedisjon) message).getEiendel();
-                logger.trace("Kontrollert: " + eiendel);
 
                 mottak.tell(new TilEkspedisjon(underBehandling), getSelf());
                 underBehandling = null;

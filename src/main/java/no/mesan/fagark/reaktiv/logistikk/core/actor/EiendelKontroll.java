@@ -29,7 +29,7 @@ public class EiendelKontroll extends UntypedActor {
     public void onReceive(final Object message) {
         if (message instanceof EiendelTilKontroll) {
             final Eiendel eiendel = ((EiendelTilKontroll) message).getEiendel();
-            logger.trace("Kontrollerer: " + eiendel);
+            logger.trace("Detaljkontroll av eiendel: " + eiendel);
 
             final ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
             final Validator validator = factory.getValidator();

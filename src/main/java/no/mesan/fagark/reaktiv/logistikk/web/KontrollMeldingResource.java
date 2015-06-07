@@ -21,7 +21,7 @@ import org.apache.abdera.Abdera;
 import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
 
-public class KontrollResource {
+public class KontrollMeldingResource {
 
     private final String eierId;
 
@@ -34,7 +34,7 @@ public class KontrollResource {
 
     private static final Abdera abdera = new Abdera();
 
-    public KontrollResource(final String eierId) {
+    public KontrollMeldingResource(final String eierId) {
         super();
         this.eierId = eierId;
     }

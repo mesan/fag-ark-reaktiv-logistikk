@@ -1,6 +1,5 @@
 package no.mesan.fagark.reaktiv.logistikk.web;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -16,6 +15,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Link;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
@@ -26,6 +26,7 @@ import no.mesan.fagark.reaktiv.logistikk.exception.ExceptionCatchable;
 import no.mesan.fagark.reaktiv.logistikk.exception.ExceptionCatcher;
 import no.mesan.fagark.reaktiv.logistikk.exception.ExceptionLogger;
 import no.mesan.fagark.reaktiv.logistikk.web.dto.EierDto;
+import no.mesan.fagark.reaktiv.logistikk.web.dto.LinkBuilder;
 
 @Path("/eier")
 public class EierResource {
@@ -39,14 +40,18 @@ public class EierResource {
     @GET
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @ExceptionCatchable(catcher = ExceptionLogger.class)
-    public List<EierDto> visEiere() {
+    public List<Link> visEiere() {
 
         final List<Eier> eiere = forvalter.listEiere();
 
-        final List<EierDto> eiereDto = new ArrayList<EierDto>();
-        eiere.forEach(e -> eiereDto.add(EierDto.create(e)));
+        final LinkBuilder linkBuilder = new LinkBuilder(uriInfo.getBaseUriBuilder());
+        linkBuilder.withResource(EierResource.class);
+        linkBuilder.withPath("/{eierid}");
+        linkBuilder.withRelation("eier");
 
-        return eiereDto;
+        eiere.forEach(e -> linkBuilder.buildLink(e.getId()));
+
+        return linkBuilder.getLinks();
     }
 
     @GET
@@ -61,7 +66,16 @@ public class EierResource {
             throw new WebApplicationException(Response.Status.NOT_FOUND);
         }
 
-        return EierDto.create(funnet.get());
+        final LinkBuilder linkBuilder = new LinkBuilder(uriInfo.getBaseUriBuilder());
+        linkBuilder.withResource(EierResource.class);
+        linkBuilder.withPath("/{eierid}/eiendel/{eiendelid}");
+        linkBuilder.withRelation("eiendel");
+
+
+        final Eier eier = funnet.get();
+        eier.getEiendeler().forEach(e -> linkBuilder.buildLink(e.getEierId(), e.getId()));
+
+        return EierDto.create(eier).withLinks(linkBuilder.getLinks());
     }
 
     @PUT
@@ -69,15 +83,14 @@ public class EierResource {
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @ExceptionCatchable(catcher = ExceptionLogger.class)
     public Response motta(@HeaderParam("callback_url") final String callbackUrl,
-            @PathParam(value = "eierid") final String eierId,
-            final EierDto eierDto) {
+            @PathParam(value = "eierid") final String eierId, final EierDto eierDto) {
 
         eierDto.id = eierId;
         eierDto.eiendelerDto.forEach(e -> e.eierid = eierDto.id);
 
         forvalter.motta(Eier.create(eierDto), callbackUrl);
 
-        return Response.created(uriInfo.getBaseUri()).build();
+        return Response.created(uriInfo.getRequestUri()).build();
     }
 
     @POST
@@ -104,12 +117,11 @@ public class EierResource {
      */
     @Path("/{eierid}/eiendel")
     public EiendelResource eiendel(@PathParam(value = "eierid") final String eierId) {
-        return ExceptionCatcher.newInstance(EiendelResource.class, eierId);
+        return ExceptionCatcher.newInstance(EiendelResource.class, eierId, uriInfo.getBaseUriBuilder());
     }
 
-    @GET
     @Path("/{eierid}/kontroll")
-    public KontrollResource kontroll(@PathParam(value = "eierid") final String eierId) {
-        return ExceptionCatcher.newInstance(KontrollResource.class, eierId);
+    public KontrollMeldingResource kontroll(@PathParam(value = "eierid") final String eierId) {
+        return ExceptionCatcher.newInstance(KontrollMeldingResource.class, eierId);
     }
 }
