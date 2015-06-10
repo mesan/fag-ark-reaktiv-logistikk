@@ -24,6 +24,8 @@ ADD . /home
 
 WORKDIR /home
 
+RUN chmod 777 ./startMedLogstash.sh
+
 RUN mvn package
 
 RUN cp target/fagark-reaktiv-logistikk-0.1-SNAPSHOT-bin.tar.gz /opt
